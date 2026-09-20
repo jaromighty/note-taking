@@ -3,10 +3,7 @@
 use App\Models\Note;
 use App\Models\Team;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-
-//uses(RefreshDatabase::class)->in('Feature');
 
 describe('Note Authorization', function () {
 
@@ -38,7 +35,7 @@ describe('Note Authorization', function () {
     it('allows authenticated users in the team to view notes', function () {
         Sanctum::actingAs($this->userA);
 
-        $response = $this->getJson("/api/teams/{$this->team1->id}/notes");
+        $response = $this->getJson("/api/v1/teams/{$this->team1->id}/notes");
 
         $response->assertStatus(200)
             ->assertJsonCount(1)
@@ -48,7 +45,7 @@ describe('Note Authorization', function () {
     it('blocks authenticated users outside the team from viewing notes', function () {
         Sanctum::actingAs($this->userC);
 
-        $response = $this->getJson("/api/teams/{$this->team1->id}/notes");
+        $response = $this->getJson("/api/v1/teams/{$this->team1->id}/notes");
 
         $response->assertStatus(403)
             ->assertJson(['message' => 'This action is unauthorized.']);
@@ -62,7 +59,7 @@ describe('Note Authorization', function () {
             'body' => 'Bob is adding a note.',
         ];
 
-        $response = $this->postJson("/api/teams/{$this->team1->id}/notes", $payload);
+        $response = $this->postJson("/api/v1/teams/{$this->team1->id}/notes", $payload);
 
         $response->assertStatus(201)
             ->assertJsonFragment(['title' => 'New Bob Note']);
@@ -78,7 +75,7 @@ describe('Note Authorization', function () {
             'body' => 'Trying to hack Team Alpha.',
         ];
 
-        $response = $this->postJson("/api/teams/{$this->team1->id}/notes", $payload);
+        $response = $this->postJson("/api/v1/teams/{$this->team1->id}/notes", $payload);
 
         $response->assertStatus(403);
     });
@@ -86,7 +83,7 @@ describe('Note Authorization', function () {
     it('allows users to update notes within the same team', function () {
         Sanctum::actingAs($this->userB);
 
-        $response = $this->putJson("/api/notes/{$this->note1->id}", [
+        $response = $this->putJson("/api/v1/notes/{$this->note1->id}", [
             'title' => 'Updated Title by Bob',
         ]);
 
@@ -97,7 +94,7 @@ describe('Note Authorization', function () {
     it('blocks users from updating notes from unauthorized teams', function () {
         Sanctum::actingAs($this->userC);
 
-        $response = $this->putJson("/api/notes/{$this->note1->id}", [
+        $response = $this->putJson("/api/v1/notes/{$this->note1->id}", [
             'title' => 'Hacked Title',
         ]);
 
@@ -107,7 +104,7 @@ describe('Note Authorization', function () {
     it('allows users to delete notes within their team', function () {
         Sanctum::actingAs($this->userA);
 
-        $response = $this->deleteJson("/api/notes/{$this->note1->id}");
+        $response = $this->deleteJson("/api/v1/notes/{$this->note1->id}");
 
         $response->assertStatus(200);
         expect(Note::find($this->note1->id))->toBeNull();
@@ -116,7 +113,7 @@ describe('Note Authorization', function () {
     it('blocks users from deleting notes from unauthorized teams', function () {
         Sanctum::actingAs($this->userC);
 
-        $response = $this->deleteJson("/api/notes/{$this->note1->id}");
+        $response = $this->deleteJson("/api/v1/notes/{$this->note1->id}");
 
         $response->assertStatus(403);
         expect(Note::find($this->note1->id))->not->toBeNull();
@@ -126,7 +123,7 @@ describe('Note Authorization', function () {
         // Even if the user guesses the Note ID, they should be blocked
         Sanctum::actingAs($this->userC);
 
-        $response = $this->getJson("/api/notes/{$this->note1->id}");
+        $response = $this->getJson("/api/v1/notes/{$this->note1->id}");
 
         $response->assertStatus(403);
     });
