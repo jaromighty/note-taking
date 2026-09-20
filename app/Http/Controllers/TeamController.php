@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateTeamRequest;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
 class TeamController extends Controller
 {
@@ -41,7 +42,7 @@ class TeamController extends Controller
      */
     public function show(Request $request, Team $team): JsonResponse
     {
-        $this->authorize('view', $team);
+        Gate::authorize('view', $team);
 
         $team->load(['users', 'owner']);
 
@@ -53,7 +54,7 @@ class TeamController extends Controller
      */
     public function update(UpdateTeamRequest $request, Team $team): JsonResponse
     {
-        $this->authorize('update', $team);
+        Gate::authorize('update', $team);
 
         $team->update($request->validated());
 
@@ -65,7 +66,7 @@ class TeamController extends Controller
      */
     public function destroy(Request $request, Team $team): JsonResponse
     {
-        $this->authorize('delete', $team);
+        Gate::authorize('delete', $team);
 
         $team->delete();
 

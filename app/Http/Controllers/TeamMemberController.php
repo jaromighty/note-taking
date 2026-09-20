@@ -7,6 +7,7 @@ use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
 class TeamMemberController extends Controller
 {
@@ -15,7 +16,7 @@ class TeamMemberController extends Controller
      */
     public function store(StoreTeamMemberRequest $request, Team $team): JsonResponse
     {
-        $this->authorize('update', $team);
+        Gate::authorize('update', $team);
 
         // Prevent adding self or existing members
         if ($team->users()->where('user_id', $request['user_id'])->exists()) {
@@ -32,7 +33,7 @@ class TeamMemberController extends Controller
      */
     public function destroy(Request $request, Team $team, User $user): JsonResponse
     {
-        $this->authorize('update', $team);
+        Gate::authorize('update', $team);
 
         $team->users()->detach($user->id);
 

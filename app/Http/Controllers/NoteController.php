@@ -8,6 +8,7 @@ use App\Models\Note;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
 class NoteController extends Controller
 {
@@ -16,7 +17,7 @@ class NoteController extends Controller
      */
     public function index(Request $request, Team $team): JsonResponse
     {
-        $this->authorize('view', $team);
+        Gate::authorize('view', $team);
 
         $notes = $team->notes()->with('author')->latest()->get();
 
@@ -28,7 +29,7 @@ class NoteController extends Controller
      */
     public function store(StoreNoteRequest $request, Team $team): JsonResponse
     {
-        $this->authorize('view', $team);
+        Gate::authorize('view', $team);
 
         $note = Note::create([
             'team_id' => $team->id,
@@ -45,7 +46,7 @@ class NoteController extends Controller
      */
     public function show(Request $request, Note $note): JsonResponse
     {
-        $this->authorize('view', $note);
+        Gate::authorize('view', $note);
 
         return response()->json($note->load('author'));
     }
@@ -55,7 +56,7 @@ class NoteController extends Controller
      */
     public function update(UpdateNoteRequest $request, Note $note): JsonResponse
     {
-        $this->authorize('update', $note);
+        Gate::authorize('update', $note);
 
         $note->update($request->validated());
 
@@ -67,7 +68,7 @@ class NoteController extends Controller
      */
     public function destroy(Request $request, Note $note): JsonResponse
     {
-        $this->authorize('delete', $note);
+        Gate::authorize('delete', $note);
 
         $note->delete();
 
