@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Note;
 use App\Models\Team;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -38,5 +38,20 @@ class TeamSeeder extends Seeder
         $team->users()->attach($user1->id);
         // Add Bob to the team
         $team->users()->attach($user2->id);
+
+        // Create notes
+        Note::create([
+            'team_id' => $team->id,
+            'user_id' => $user1->id,
+            'title' => 'Project Kickoff',
+            'body' => 'Meeting notes from the initial brainstorming session.',
+        ]);
+
+        Note::create([
+            'team_id' => $team->id,
+            'user_id' => $user2->id,
+            'title' => 'Q4 Goals',
+            'body' => 'Draft goals for the upcoming quarter.',
+        ]);
     }
 }
