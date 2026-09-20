@@ -35,23 +35,23 @@ The API will be available at http://localhost:8000/api.
 ## 📡 API Endpoints
 All endpoints require an `Authorization: Bearer {token}` header (except login/register).
 
-| Method | Endpoint                | Description                                     |
-|:-------|-------------------------|-------------------------------------------------|
-| POST   | /api/register           | Register a new user                             |
-| POST   | /api/login              | Login and receive a token                       |
-| POST   | /api/logout             | Revoke current token                            |
-| POST   | /api/teams              | Create a new team (creator joins automatically) |
-| GET    | /api/teams              | List teams the current user belongs to          |
-| POST   | /api/teams/{id}/members | Add a user to a team (Admin only)               |
-| GET    | /api/teams/{id}/notes   | List all notes in a team                        |
-| POST   | /api/teams/{id}/notes   | Create a new note in a team                     |
-| GET    | /api/notes/{id}         | View a specific note                            |
-| PUT    | /api/notes/{id}         | Update a note                                   |
-| DELETE | /api/notes/{id}         | Delete a note                                   |
+| Method | Endpoint                   | Description                                     |
+|:-------|----------------------------|-------------------------------------------------|
+| POST   | /api/v1/register           | Register a new user                             |
+| POST   | /api/v1/login              | Login and receive a token                       |
+| POST   | /api/v1/logout             | Revoke current token                            |
+| POST   | /api/v1/teams              | Create a new team (creator joins automatically) |
+| GET    | /api/v1/teams              | List teams the current user belongs to          |
+| POST   | /api/v1/teams/{id}/members | Add a user to a team (Admin only)               |
+| GET    | /api/v1/teams/{id}/notes   | List all notes in a team                        |
+| POST   | /api/v1/teams/{id}/notes   | Create a new note in a team                     |
+| GET    | /api/v1/notes/{id}         | View a specific note                            |
+| PUT    | /api/v1/notes/{id}         | Update a note                                   |
+| DELETE | /api/v1/notes/{id}         | Delete a note                                   |
 
 ### Example: Creating a Note
 ```bash
-curl -X POST http://localhost:8000/api/teams/1/notes \
+curl -X POST http://localhost:8000/api/v1/teams/1/notes \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{"title": "Meeting Notes", "body": "Discuss Q4 goals"}'
@@ -86,7 +86,15 @@ seamless migration to a production RDBMS with zero code changes.
 large apps, a dedicated middleware (`CheckTeamMembership`) was chosen here for brevity and clarity in a small codebase.
 It effectively prevents users from accessing resources outside their team context.
 
-### 5. Scope Exclusions
+### 5. API Versioning Strategy
+**Decision:** All authenticated business logic endpoints are prefixed with /v1 (e.g., /api/v1/teams). Public auth
+endpoints (/register, /login) remain unversioned. **Reasoning:** This establishes a clear contract for API consumers. It
+allows us to introduce breaking changes in the future (e.g., /v2/) without disrupting existing clients. Keeping auth
+endpoints unversioned simplifies the login flow while ensuring the core data operations are version-controlled.
+**Tradeoff:** Requires clients to update their base URL when switching versions, but this is a standard industry
+practice that prevents silent breakage.
+
+### 6. Scope Exclusions
 To ensure a working, bug-free delivery within 6 hours, the following were intentionally excluded:
 - **Soft Deletes:** Hard deletes are used to simplify the schema. Soft deletes can be added via the SoftDeletes trait later.
 - **File Attachments:** Notes are text-only to avoid storage driver complexity and security risks (XSS/Malware).
