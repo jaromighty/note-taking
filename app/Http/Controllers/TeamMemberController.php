@@ -15,9 +15,7 @@ class TeamMemberController extends Controller
      */
     public function store(StoreTeamMemberRequest $request, Team $team): JsonResponse
     {
-        if (!$request->user()->teams()->where('teams.id', $team->id)->exists()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('update', $team);
 
         // Prevent adding self or existing members
         if ($team->users()->where('user_id', $request['user_id'])->exists()) {
@@ -34,13 +32,7 @@ class TeamMemberController extends Controller
      */
     public function destroy(Request $request, Team $team, User $user): JsonResponse
     {
-        // Authorization: Can anyone remove, or only owner?
-        // Let's allow owner or the user themselves to leave.
-        $currentUser = $request->user();
-
-        if ($team->owner_id !== $currentUser->id && $currentUser->id !== $user->id) {
-            return response()->json(['message' => 'Only the owner or the user themselves can remove a member.'], 403);
-        }
+        $this->authorize('update', $team);
 
         $team->users()->detach($user->id);
 

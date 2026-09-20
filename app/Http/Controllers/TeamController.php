@@ -41,10 +41,7 @@ class TeamController extends Controller
      */
     public function show(Request $request, Team $team): JsonResponse
     {
-        // Authorization Check: Ensure user is part of this team
-        if (!$request->user()->teams()->where('teams.id', $team->id)->exists()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('view', $team);
 
         $team->load(['users', 'owner']);
 
@@ -56,10 +53,7 @@ class TeamController extends Controller
      */
     public function update(UpdateTeamRequest $request, Team $team): JsonResponse
     {
-        // Authorization Check
-        if (!$request->user()->teams()->where('teams.id', $team->id)->exists()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('update', $team);
 
         $team->update($request->validated());
 
@@ -71,9 +65,7 @@ class TeamController extends Controller
      */
     public function destroy(Request $request, Team $team): JsonResponse
     {
-        if ($team->owner_id !== $request->user()->id) {
-            return response()->json(['message' => 'Only the team owner can delete this team.'], 403);
-        }
+        $this->authorize('delete', $team);
 
         $team->delete();
 

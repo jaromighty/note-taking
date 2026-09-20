@@ -16,10 +16,7 @@ class NoteController extends Controller
      */
     public function index(Request $request, Team $team): JsonResponse
     {
-        // Authorization: Ensure user is a member of this team
-        if (!$request->user()->teams()->where('teams.id', $team->id)->exists()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('view', $team);
 
         $notes = $team->notes()->with('author')->latest()->get();
 
@@ -31,10 +28,7 @@ class NoteController extends Controller
      */
     public function store(StoreNoteRequest $request, Team $team): JsonResponse
     {
-        // Authorization: Ensure user is a member of this team
-        if (!$request->user()->teams()->where('teams.id', $team->id)->exists()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('view', $team);
 
         $note = Note::create([
             'team_id' => $team->id,
@@ -51,10 +45,7 @@ class NoteController extends Controller
      */
     public function show(Request $request, Note $note): JsonResponse
     {
-        // Authorization: Ensure user is a member of the note's team
-        if (!$request->user()->teams()->where('teams.id', $note->team_id)->exists()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('view', $note);
 
         return response()->json($note->load('author'));
     }
@@ -64,10 +55,7 @@ class NoteController extends Controller
      */
     public function update(UpdateNoteRequest $request, Note $note): JsonResponse
     {
-        // Authorization: Ensure user is a member of the note's team
-        if (!$request->user()->teams()->where('teams.id', $note->team_id)->exists()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('update', $note);
 
         $note->update($request->validated());
 
@@ -79,10 +67,7 @@ class NoteController extends Controller
      */
     public function destroy(Request $request, Note $note): JsonResponse
     {
-        // Authorization: Ensure user is a member of the note's team
-        if (!$request->user()->teams()->where('teams.id', $note->team_id)->exists()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('delete', $note);
 
         $note->delete();
 
